@@ -1,0 +1,50 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "${_IMAGE_HELLOWORLD}", "./helloworld"]
+    id: BUILD_HELLOWORLD_CONTAINER
+    waitFor: ["-"]
+
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "${_IMAGE_OPASIDECAR}", "./opasidecar"]
+    id: BUILD_OPASIDECAR_CONTAINER
+    waitFor: ["-"]
+
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "${_IMAGE_HELLOWORLD}"]
+    id: PUSH_HELLOWORLD_CONTAINER
+    waitFor:
+      - BUILD_HELLOWORLD_CONTAINER
+
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "${_IMAGE_OPASIDECAR}"]
+    id: PUSH_OPASIDECAR_CONTAINER
+    waitFor:
+      - BUILD_OPASIDECAR_CONTAINER
+
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      [
+        "run",
+        "services",
+        "replace",
+        "service.yaml",
+        "--region",
+        "asia-northeast1",
+      ]
+    id: DEPLOY_MULTICONTAINER
+    waitFor:
+      - PUSH_HELLOWORLD_CONTAINER
+      - PUSH_OPASIDECAR_CONTAINER
+
+substitutions:
+  _REGISTRY: <Artifact Registryのパスに変更>/my-container
+  _IMAGE_HELLOWORLD: ${_REGISTRY}/helloworld:latest
+  _IMAGE_OPASIDECAR: ${_REGISTRY}/opasidecar:latest
+
+images:
+  - ${_IMAGE_HELLOWORLD}
+  - ${_IMAGE_OPASIDECAR}
+
+options:
+  dynamic_substitutions: true

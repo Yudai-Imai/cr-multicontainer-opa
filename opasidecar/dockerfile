@@ -1,0 +1,11 @@
+# ベースイメージとして公式の OPA コンテナを使用します
+FROM openpolicyagent/opa:latest
+
+# ポリシーファイルをコンテナ内にコピーします
+COPY example.rego /app/example.rego
+
+# Cloud Run のサイドカーに必要なポートを公開します
+EXPOSE 5050
+
+# デフォルトのコマンドを指定します（OPAのサーバーを起動します）
+CMD ["run", "--server", "--addr=:5050", "/app/example.rego", "--log-level", "debug"]

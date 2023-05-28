@@ -1,0 +1,20 @@
+# ベースイメージとしてPythonの公式イメージを使用
+FROM python:3.9-slim
+
+# 必要なパッケージのインストール
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# 作業ディレクトリの設定
+WORKDIR /app
+
+# ホスト上のコードをコンテナ内にコピー
+COPY . /app
+
+# 必要なPythonパッケージのインストール
+RUN pip install -r requirements.txt
+EXPOSE 8080
+
+# コンテナの起動時に実行するコマンド
+CMD ["python", "app.py"]

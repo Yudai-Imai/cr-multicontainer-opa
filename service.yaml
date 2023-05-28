@@ -1,0 +1,18 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+     run.googleapis.com/launch-stage: BETA
+  name: opa-sidecar-challenge
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/execution-environment: gen1 #or gen2
+    spec:
+      containers:
+      - image: <Artifact Registryのパスに変更>/my-container/helloworld:latest
+        ports:
+          - containerPort: 8080
+      - image: <Artifact Registryのパスに変更>/my-container/opasidecar:latest
+      
